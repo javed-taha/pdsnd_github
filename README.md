@@ -15,6 +15,17 @@ This Python script analyzes bike share data for three major cities in the United
 - User statistics
 - Option to view raw data
 
+## Project Structure
+
+- Main script: `bikeshare.py`
+- Data directory: Store `chicago.csv`, `new_york_city.csv` and `washington.csv` data files.
+   - Refer to [detailed instructions](data/README.md) in the data directory.
+- Project setup files:
+   - `environment.yml`: Use with conda
+   - `requirements.txt`: Use with pip
+- Other files:
+   - `.gitignore`: Exclude files not required by project
+
 ## Requirements
 
 - Python 3.12.4

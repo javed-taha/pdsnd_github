@@ -1,0 +1,8 @@
+name: project_bikeshare
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12.4
+  - pandas=2.2.2
+  - numpy=1.26.4

@@ -149,6 +149,22 @@ def load_data(city: str, month: str, day: str) -> pd.DataFrame:
         period_input: str,
         valid_periods: list[str],
     ) -> pd.DataFrame:
+        """
+        Filters the DataFrame by a specified period (month or day).
+
+        Args:
+            df_input (pd.DataFrame): Input DataFrame to be filtered.
+            col_name (str): Column name in DataFrame to filter by.
+            period_name (str): Name of the period (e.g., "month", "day").
+            period_input (str): User-provided period value to filter by.
+            valid_periods (list): List of valid period values.
+
+        Returns:
+            pd.DataFrame: Filtered DataFrame.
+
+        Raises:
+            ValueError: If the provided period value is invalid.
+        """
         period_input = period_input.strip().lower()
         # Filter by period if applicable
         if period_input != ALL_OPTION:
@@ -262,6 +278,16 @@ def trip_duration_stats(df: pd.DataFrame) -> None:
     start_time = time.time()
 
     def format_duration(seconds: float) -> str:
+        """
+        Converts a duration from seconds into a human-readable string.
+
+        Args:
+            seconds (float): Duration in seconds.
+
+        Returns:
+            str: Duration formatted as a human-readable string
+                - e.g., '1 day 2 hours 3 minutes 4 seconds'.
+        """
         days = int(seconds // 86400)
         hours = int((seconds % 86400) // 3600)
         minutes = int((seconds % 3600) // 60)

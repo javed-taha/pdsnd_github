@@ -41,6 +41,10 @@ DATETIME_COLUMNS = ["Start Time", "End Time"]
 def get_valid_input(prompt, valid_options, allow_all=True):
     """Get and validate user input.
 
+    This function prompts the user for input and validates it against a list of valid
+    options. It continues to prompt until a valid response is received. If 'all' is
+    set to 'True' then it allows a blank or 'all' response as a valid input.
+
     Args:
         prompt (str): The input prompt message to display to the user.
         valid_options (list[str]): A list of valid input options.
@@ -55,7 +59,7 @@ def get_valid_input(prompt, valid_options, allow_all=True):
             return user_input
         if allow_all and (user_input == "" or user_input == ALL_OPTION):
             return ALL_OPTION
-        print("Invalid input. Please try again.\n")
+        print(f"Invalid input. Please enter one of: {', '.join(valid_options)}")
 
 
 def get_filters():
@@ -394,28 +398,6 @@ def user_stats(df):
         print(SEPARATORS["sep1"])
 
 
-def get_user_input(prompt, valid_responses):
-    """
-    Get and validate user input.
-
-    This function prompts the user for input and validates it against a list of
-    valid responses. It continues to prompt until a valid response is received.
-
-    Args:
-        prompt (str): The prompt to display to the user.
-        valid_responses (list[str]): A list of valid responses to choose from.
-
-    Returns:
-        str: The validated user input string.
-    """
-    while True:
-        response = input(prompt).strip().lower()
-        if response in valid_responses:
-            return response
-        else:
-            print(f"Invalid input. Please enter one of: {', '.join(valid_responses)}")
-
-
 def wait_for_user():
     """
     Pause execution until the user presses Enter.
@@ -439,7 +421,9 @@ def display_raw_data(df):
     row_index = 0
     while True:
         msg = "\nWould you like to see 5 lines of raw data? (y/n): "
-        display_choice = get_user_input(prompt=msg, valid_responses=["y", "n"])
+        display_choice = get_valid_input(
+            prompt=msg, valid_options=["y", "n"], allow_all=False
+        )
 
         if display_choice == "n":
             break
@@ -480,12 +464,13 @@ def user_action_menu(df):
         print(f"{exit_choice}. Exit")
         valid_choices = [str(i) for i in range(1, exit_choice + 1)]
 
-        choice = get_user_input(
-            f"\nChoose an analysis to run (1 to {len(stats_funcs)}) or"
+        choice = get_valid_input(
+            prompt=f"\nChoose an analysis to run (1 to {len(stats_funcs)}) or"
             f" '{raw_data_choice}' to display raw data.\n"
             f"Press '{exit_choice}' to exit to the main program.\n"
             "Please enter your choice: ",
-            valid_responses=valid_choices,
+            valid_options=valid_choices,
+            allow_all=False,
         )
 
         if choice == str(exit_choice):
@@ -524,8 +509,10 @@ def main():
             user_action_menu(df)
 
             if (
-                get_user_input(
-                    "\nDo you want to restart with new filters? (y/n): ", ["y", "n"]
+                get_valid_input(
+                    prompt="\nDo you want to restart with new filters? (y/n): ",
+                    valid_options=["y", "n"],
+                    allow_all=False,
                 )
                 == "n"
             ):
@@ -534,8 +521,10 @@ def main():
         except Exception as e:
             print(f"An error occurred: {e}")
             if (
-                get_user_input(
-                    "\nDo you want to restart the program? (y/n): ", ["y", "n"]
+                get_valid_input(
+                    prompt="\nDo you want to restart the program? (y/n): ",
+                    valid_options=["y", "n"],
+                    allow_all=False,
                 )
                 == "n"
             ):

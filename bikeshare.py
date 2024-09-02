@@ -59,7 +59,7 @@ def get_valid_input(prompt, valid_options, allow_all=True):
             return user_input
         if allow_all and (user_input == "" or user_input == ALL_OPTION):
             return ALL_OPTION
-        print(f"Invalid input. Please enter one of: {', '.join(valid_options)}")
+        print(f"Invalid input. Please enter one of: {', '.join(valid_options).title()}")
 
 
 def get_filters():
@@ -486,21 +486,27 @@ def user_action_menu(df):
             wait_for_user()
 
 
+def prompt_restart(message):
+    """Prompt the user for restarting the program or analysis."""
+    return (
+        get_valid_input(
+            prompt=message,
+            valid_options=["y", "n"],
+            allow_all=False,
+        )
+        == "n"
+    )
+
+
 def main():
     """
     Main function to run the bike share data analysis program.
 
-    This function orchestrates the entire program flow. It repeatedly:
-    1. Prompts for and gets filter criteria from the user.
-    2. Loads and filters the data based on user input.
-    3. Presents the user action menu for data analysis.
-    4. Asks if the user wants to restart with new filters.
-
-    The function handles exceptions and allows the user to restart or exit
-    the program in case of errors.
-
-    Raises:
-        Exception: Any unexpected error that occurs during program execution.
+    It handles the program flow, including:
+    1. Prompting for filters.
+    2. Loading and filtering the data.
+    3. Presenting user actions for analysis.
+    4. Asking if the user wants to restart.
     """
     while True:
         try:
@@ -508,32 +514,18 @@ def main():
             df = load_data(city, month, day)
             user_action_menu(df)
 
-            if (
-                get_valid_input(
-                    prompt="\nDo you want to restart with new filters? (y/n): ",
-                    valid_options=["y", "n"],
-                    allow_all=False,
-                )
-                == "n"
-            ):
+            if prompt_restart("\nDo you want to restart with new filters? (y/n): "):
                 break
 
         except Exception as e:
             print(f"An error occurred: {e}")
-            if (
-                get_valid_input(
-                    prompt="\nDo you want to restart the program? (y/n): ",
-                    valid_options=["y", "n"],
-                    allow_all=False,
-                )
-                == "n"
-            ):
+            if prompt_restart("\nDo you want to restart the program? (y/n): "):
                 break
 
         print("\nRestarting the analysis with new filters. Please wait...")
         print(SEPARATORS["sep1"], "\n")
 
-    # Once While loop is terminated this signals the end of the program
+    # Once the while loop ends, display the exit message.
     exit_msg = (
         "\nExiting the program. Thank you for using the bike share data "
         "analysis program! Come back soon =)"

@@ -2,15 +2,14 @@ import time
 import os
 import pandas as pd
 import numpy as np
-from typing import Callable
 
-CITY_DATA: dict[str, str] = {
+CITY_DATA = {
     "chicago": "chicago.csv",
     "new york city": "new_york_city.csv",
     "washington": "washington.csv",
 }
 
-VALID_MONTHS: list[str] = [
+VALID_MONTHS = [
     "january",
     "february",
     "march",
@@ -19,7 +18,7 @@ VALID_MONTHS: list[str] = [
     "june",
 ]
 
-VALID_DAYS: list[str] = [
+VALID_DAYS = [
     "monday",
     "tuesday",
     "wednesday",
@@ -29,7 +28,7 @@ VALID_DAYS: list[str] = [
     "sunday",
 ]
 
-SEPARATORS: dict[str, str] = {
+SEPARATORS = {
     "sep1": "=" * 100,
     "sep2": "-" * 100,
     "sep3": "*" * 100,
@@ -39,9 +38,7 @@ ALL_OPTION = "all"
 DATETIME_COLUMNS = ["Start Time", "End Time"]
 
 
-def get_valid_input(
-    prompt: str, valid_options: list[str], allow_all: bool = True
-) -> str:
+def get_valid_input(prompt, valid_options, allow_all=True):
     """Get and validate user input.
 
     Args:
@@ -61,7 +58,7 @@ def get_valid_input(
         print("Invalid input. Please try again.\n")
 
 
-def get_filters() -> tuple[str, str, str]:
+def get_filters():
     """Ask users to specify a city, month, and day to analyze.
 
     This function prompts the user to input a city, month, and day for data analysis.
@@ -103,7 +100,7 @@ def get_filters() -> tuple[str, str, str]:
     return city, month, day
 
 
-def load_data(city: str, month: str, day: str) -> pd.DataFrame:
+def load_data(city, month, day):
     """
     Loads data for the specified city and filters by month and day if applicable.
 
@@ -121,8 +118,10 @@ def load_data(city: str, month: str, day: str) -> pd.DataFrame:
     """
     filename = ""
     try:
+        # Construct the file path
         filename = os.path.join("./data/", CITY_DATA[city.lower()])
-        df = pd.read_csv(filename, parse_dates=DATETIME_COLUMNS, index_col=0)
+        # Read the CSV file with specified date columns and index column
+        df = pd.read_csv(filename, parse_dates=DATETIME_COLUMNS, index_col="Unnamed: 0")
     except FileNotFoundError as e:
         raise FileNotFoundError(f"File not found: {filename}") from e
     except KeyError:
@@ -132,8 +131,16 @@ def load_data(city: str, month: str, day: str) -> pd.DataFrame:
             raise ValueError("Required column(s) missing in the CSV file.") from e
         else:
             raise
+    except Exception as e:
+        # Handle any other exception that may arise due to index_col
+        if "Unnamed: 0" in str(e):
+            raise ValueError(
+                "Error with the specified index column 'Unnamed: 0'."
+            ) from e
+        else:
+            raise
 
-    # Derived columns
+    # Add derived columns for month, day name, and trip description
     df["Month"] = df["Start Time"].dt.month_name()
     df["Day Name"] = df["Start Time"].dt.day_name()
     df["Trip"] = (
@@ -142,13 +149,23 @@ def load_data(city: str, month: str, day: str) -> pd.DataFrame:
         + df["End Station"].astype(str).fillna("No End Station")
     )
 
-    def filter_by_period(
-        df_input: pd.DataFrame,
-        col_name: str,
-        period_name: str,
-        period_input: str,
-        valid_periods: list[str],
-    ) -> pd.DataFrame:
+    def filter_by_period(df_input, col_name, period_name, period_input, valid_periods):
+        """
+        Filters the DataFrame by a specified period (month or day).
+
+        Args:
+            df_input (pd.DataFrame): Input DataFrame to be filtered.
+            col_name (str): Column name in DataFrame to filter by.
+            period_name (str): Name of the period (e.g., "month", "day").
+            period_input (str): User-provided period value to filter by.
+            valid_periods (list): List of valid period values.
+
+        Returns:
+            pd.DataFrame: Filtered DataFrame.
+
+        Raises:
+            ValueError: If the provided period value is invalid.
+        """
         period_input = period_input.strip().lower()
         # Filter by period if applicable
         if period_input != ALL_OPTION:
@@ -157,16 +174,16 @@ def load_data(city: str, month: str, day: str) -> pd.DataFrame:
             df_output = df_input[df_input[col_name] == period_input.title()]
             return df_output
         else:
-            df_output = df_input
-            return df_output
+            return df_input
 
+    # Filter the DataFrame by month and day
     df = filter_by_period(df, "Month", "month", month, VALID_MONTHS)
     df = filter_by_period(df, "Day Name", "day", day, VALID_DAYS)
 
     return df
 
 
-def time_stats(df: pd.DataFrame) -> None:
+def time_stats(df):
     """
     Displays statistics on the most frequent times of travel.
 
@@ -180,9 +197,9 @@ def time_stats(df: pd.DataFrame) -> None:
         AttributeError: If expected columns are missing from the DataFrame.
         IndexError: If the DataFrame is empty or mode calculation fails.
     """
+    start_time = time.time()
     print("\nCalculating the Most Frequent Times of Travel...")
     print(SEPARATORS["sep2"])
-    start_time = time.time()
 
     try:
         # Calculate stats
@@ -200,11 +217,11 @@ def time_stats(df: pd.DataFrame) -> None:
 
     finally:
         # Performance of function stats
-        print("\nThis took {} seconds.".format(time.time() - start_time))
+        print(f"\nThis took {time.time() - start_time} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
-def station_stats(df: pd.DataFrame) -> None:
+def station_stats(df):
     """
     Displays statistics on the most popular stations and trip.
 
@@ -218,9 +235,9 @@ def station_stats(df: pd.DataFrame) -> None:
         AttributeError: If expected columns are missing from the DataFrame.
         IndexError: If the DataFrame is empty or mode calculation fails.
     """
+    start_time = time.time()
     print("\nCalculating the Most Popular Stations and Trip...")
     print(SEPARATORS["sep2"])
-    start_time = time.time()
 
     try:
         # Calculate stats
@@ -238,11 +255,11 @@ def station_stats(df: pd.DataFrame) -> None:
 
     finally:
         # Performance of function stats
-        print("\nThis took {} seconds.".format(time.time() - start_time))
+        print(f"\nThis took {time.time() - start_time} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
-def trip_duration_stats(df: pd.DataFrame) -> None:
+def trip_duration_stats(df):
     """
     Displays statistics on the total and average trip duration.
 
@@ -257,53 +274,72 @@ def trip_duration_stats(df: pd.DataFrame) -> None:
         AttributeError: If the 'Trip Duration' column is missing from the DataFrame.
         IndexError: If the DataFrame is empty.
     """
+    start_time = time.time()  # Record the start time of the function
     print("\nCalculating Trip Duration...")
     print(SEPARATORS["sep2"])
-    start_time = time.time()
 
-    def format_duration(seconds: float) -> str:
-        days = int(seconds // 86400)
-        hours = int((seconds % 86400) // 3600)
-        minutes = int((seconds % 3600) // 60)
-        seconds = int(round(seconds % 60))
+    def format_duration(seconds):
+        """
+        Converts a duration from seconds into a human-readable string.
 
-        duration = []
+        Args:
+            seconds (float): Duration in seconds.
+
+        Returns:
+            str: Duration formatted as a human-readable string.
+                - e.g., '1 day 2 hours 3 minutes 4 seconds'.
+        """
+        days = int(seconds // 86400)  # Calculate the number of days
+        hours = int((seconds % 86400) // 3600)  # Calculate the number of hours
+        minutes = int((seconds % 3600) // 60)  # Calculate the number of minutes
+        seconds = int(round(seconds % 60))  # Calculate the remaining seconds
+
+        duration = []  # Initialize an empty list to store duration components
         if days > 0:
             duration.append(f"{days} days")
         if hours > 0:
             duration.append(f"{hours} hours")
         if minutes > 0:
             duration.append(f"{minutes} minutes")
-        # Displays seconds only if it's the only unit available
+        # Display seconds if there are any or if no other units are available
         if seconds > 0 or not duration:
             duration.append(f"{seconds} seconds")
 
-        return " ".join(duration)
+        return " ".join(duration)  # Join the duration components into a single string
 
     try:
-        # Calculate stats
-        # Calculate stats using numpy
-        trip_durations = df["Trip Duration"].values
-        total_travel_time_seconds = float(np.sum(trip_durations))
-        mean_travel_time_seconds = float(np.mean(trip_durations))
+        # Calculate statistics using numpy
+        trip_durations = df["Trip Duration"].values  # Extract the trip duration values
+        total_travel_time_seconds = float(
+            np.sum(trip_durations)
+        )  # Calculate total travel time
+        mean_travel_time_seconds = float(
+            np.mean(trip_durations)
+        )  # Calculate mean travel time
 
-        total_travel_time_fmt = format_duration(total_travel_time_seconds)
-        mean_travel_time_fmt = format_duration(mean_travel_time_seconds)
+        # Get formatted duration text
+        total_travel_time_fmt = format_duration(
+            total_travel_time_seconds
+        )  # Format total travel time
+        mean_travel_time_fmt = format_duration(
+            mean_travel_time_seconds
+        )  # Format mean travel time
 
         # Display the total and mean travel time
         print(f"The total travel time is {total_travel_time_fmt}.")
         print(f"The mean travel time is {mean_travel_time_fmt}.")
 
     except (AttributeError, IndexError) as e:
+        # Handle exceptions and print an error message
         print(f"Error calculating trip duration stats: {e}")
 
     finally:
-        # Performance of function stats
-        print("\nThis took {} seconds.".format(time.time() - start_time))
+        # Print the time taken to run the function
+        print(f"\nThis took {time.time() - start_time} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
-def user_stats(df: pd.DataFrame) -> None:
+def user_stats(df):
     """
     Displays statistics on bike share users.
 
@@ -322,9 +358,9 @@ def user_stats(df: pd.DataFrame) -> None:
         IndexError: If the DataFrame is empty or calculations fail.
         ValueError: If birth year data contains invalid values.
     """
+    start_time = time.time()
     print("\nCalculating Users Stats...")
     print(SEPARATORS["sep2"])
-    start_time = time.time()
 
     try:
         # Calculate and Display User Stats
@@ -354,11 +390,11 @@ def user_stats(df: pd.DataFrame) -> None:
 
     finally:
         # Performance of function stats
-        print(f"This took {time.time() - start_time} seconds.")
+        print(f"\nThis took {time.time() - start_time} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
-def get_user_input(prompt: str, valid_responses: list[str]) -> str:
+def get_user_input(prompt, valid_responses):
     """
     Get and validate user input.
 
@@ -380,7 +416,7 @@ def get_user_input(prompt: str, valid_responses: list[str]) -> str:
             print(f"Invalid input. Please enter one of: {', '.join(valid_responses)}")
 
 
-def wait_for_user() -> None:
+def wait_for_user():
     """
     Pause execution until the user presses Enter.
 
@@ -390,7 +426,7 @@ def wait_for_user() -> None:
     input("\nPress Enter to continue...")
 
 
-def display_raw_data(df: pd.DataFrame) -> None:
+def display_raw_data(df):
     """
     Display 5 lines of raw data at a time based on user input.
 
@@ -416,7 +452,7 @@ def display_raw_data(df: pd.DataFrame) -> None:
             break
 
 
-def user_action_menu(df: pd.DataFrame) -> None:
+def user_action_menu(df):
     """
     Allow the user to choose an action to perform on the bike share data.
 
@@ -427,8 +463,7 @@ def user_action_menu(df: pd.DataFrame) -> None:
     Args:
         df (pd.DataFrame): A pandas dataframe containing the bike share data.
     """
-    stat_function = Callable[[pd.DataFrame], None]
-    stats_funcs: list[stat_function] = [
+    stats_funcs = [
         time_stats,
         station_stats,
         trip_duration_stats,
@@ -466,7 +501,7 @@ def user_action_menu(df: pd.DataFrame) -> None:
             wait_for_user()
 
 
-def main() -> None:
+def main():
     """
     Main function to run the bike share data analysis program.
 

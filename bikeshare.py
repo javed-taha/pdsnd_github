@@ -221,7 +221,7 @@ def time_stats(df):
 
     finally:
         # Performance of function stats
-        print(f"\nThis took {time.time() - start_time} seconds to run.")
+        print(f"\nThis took {time.time() - start_time:.2f} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
@@ -259,7 +259,7 @@ def station_stats(df):
 
     finally:
         # Performance of function stats
-        print(f"\nThis took {time.time() - start_time} seconds to run.")
+        print(f"\nThis took {time.time() - start_time:.2f} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
@@ -299,15 +299,19 @@ def trip_duration_stats(df):
         seconds = int(round(seconds % 60))  # Calculate the remaining seconds
 
         duration = []  # Initialize an empty list to store duration components
+
+        # Append days
         if days > 0:
-            duration.append(f"{days} days")
+            duration.append(f"{days} day{'s' if days != 1 else ''}")
+        # Append hours
         if hours > 0:
-            duration.append(f"{hours} hours")
+            duration.append(f"{hours} hour{'s' if hours != 1 else ''}")
+        # Append minutes
         if minutes > 0:
-            duration.append(f"{minutes} minutes")
-        # Display seconds if there are any or if no other units are available
+            duration.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+        # Append seconds
         if seconds > 0 or not duration:
-            duration.append(f"{seconds} seconds")
+            duration.append(f"{seconds} second{'s' if seconds != 1 else ''}")
 
         return " ".join(duration)  # Join the duration components into a single string
 
@@ -339,7 +343,7 @@ def trip_duration_stats(df):
 
     finally:
         # Print the time taken to run the function
-        print(f"\nThis took {time.time() - start_time} seconds to run.")
+        print(f"\nThis took {time.time() - start_time:.2f} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
@@ -384,7 +388,7 @@ def user_stats(df):
 
                 print(f"Earliest birth year: {earliest_birth_year}")
                 print(f"Most recent birth year: {most_recent_birth_year}")
-                print(f"Most common birth year: {most_common_birth_year}\n")
+                print(f"Most common birth year: {most_common_birth_year}")
             except ValueError as ve:
                 print(f"Error processing birth years: {ve}")
                 print("Birth year data may contain invalid values.\n")
@@ -394,7 +398,7 @@ def user_stats(df):
 
     finally:
         # Performance of function stats
-        print(f"\nThis took {time.time() - start_time} seconds to run.")
+        print(f"\nThis took {time.time() - start_time:.2f} seconds to run.")
         print(SEPARATORS["sep1"])
 
 
@@ -487,7 +491,11 @@ def user_action_menu(df):
 
 
 def prompt_restart(message):
-    """Prompt the user for restarting the program or analysis."""
+    """Prompt the user for restarting the program or analysis.
+
+    Args:
+        message (str): A restart prompt given to the end-user.
+    """
     return (
         get_valid_input(
             prompt=message,

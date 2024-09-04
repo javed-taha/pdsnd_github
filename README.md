@@ -48,12 +48,12 @@ either Conda or pip.
 
 ### Common Steps
 
-1. Fork the [repository](https://github.com/javed-taha/pdsnd_github.git) in GitHub.
+1. Fork the [repository](https://github.com/javed-taha/project_bikeshare.git) in GitHub.
 2. Clone the repository:
 
    ```shell
-   git clone https://github.com/your-username/pdsnd_github.git
-   cd pdsnd_github
+   git clone https://github.com/<your_username>/project_bikeshare.git
+   cd project_bikeshare
    ```
 
 ### Option 1: Using Conda
